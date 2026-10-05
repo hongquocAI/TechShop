@@ -1,0 +1,66 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\Product;
+use Illuminate\Http\Request;
+
+class ShopController extends Controller
+{
+    public function home()
+    {
+        return view('shop.home', [
+            'featured' => Product::published()->where('stock', '>', 0)->latest()->take(8)->get(),
+            'categories' => Category::withCount(['products' => fn ($q) => $q->published()])->get(),
+        ]);
+    }
+
+    public function index(Request $request, ?Category $category = null)
+    {
+        $q = Product::published()->with(['brand', 'category']);
+
+        if ($category) $q->where('category_id', $category->id);
+        if ($s = $request->query('q')) $q->where('name', 'like', "%{$s}%");
+        if ($b = $request->query('brand')) $q->where('brand_id', $b);
+        if ($min = $request->query('min')) $q->whereRaw('COALESCE(sale_price, price) >= ?', [(int) $min]);
+        if ($max = $request->query('max')) $q->whereRaw('COALESCE(sale_price, price) <= ?', [(int) $max]);
+
+        // Lọc theo thuộc tính động (is_filterable): ?attr[5]=Bluetooth 5.3
+        foreach ((array) $request->query('attr', []) as $attrId => $val) {
+            if ($val !== '' && $val !== null) {
+                $q->whereHas('attributeValues', fn ($v) => $v->where('attribute_id', $attrId)->where('value', $val));
+            }
+        }
+
+        match ($request->query('sort')) {
+            'price_asc' => $q->orderByRaw('COALESCE(sale_price, price) asc'),
+            'price_desc' => $q->orderByRaw('COALESCE(sale_price, price) desc'),
+            default => $q->latest(),
+        };
+
+        // Bộ lọc thuộc tính hiển thị theo danh mục đang xem
+        $filters = $category
+            ? $category->attributes()->where('is_filterable', true)->get()->map(function ($a) {
+                $a->choices = $a->type === 'select' && $a->options ? $a->options
+                    : \App\Models\ProductAttributeValue::where('attribute_id', $a->id)->distinct()->pluck('value')->all();
+                return $a;
+            })
+            : collect();
+
+        return view('shop.index', [
+            'products' => $q->paginate(12)->withQueryString(),
+            'category' => $category, 'brands' => Brand::orderBy('name')->get(),
+            'categories' => Category::all(), 'filters' => $filters,
+        ]);
+    }
+
+    public function show(string $slug)
+    {
+        $product = Product::published()->with(['brand', 'category', 'attributeValues.attribute'])->where('slug', $slug)->firstOrFail();
+        $related = Product::published()->where('category_id', $product->category_id)->where('id', '!=', $product->id)->take(4)->get();
+
+        return view('shop.show', compact('product', 'related'));
+    }
+}
