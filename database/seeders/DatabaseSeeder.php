@@ -73,7 +73,7 @@ class DatabaseSeeder extends Seeder
                 'price' => $price, 'sale_price' => $sale, 'stock' => $stock, 'status' => 'published',
                 'description' => "{$name} - phụ kiện công nghệ chính hãng, bảo hành 12 tháng, đổi trả trong 7 ngày.",
             ]);
-            foreach ($cats[$cat]->attributes as $k => $attr) {
+            foreach ($cats[$cat]->attributes()->orderBy('id')->get() as $k => $attr) {
                 if (($vals[$k] ?? '') !== '') $p->attributeValues()->create(['attribute_id' => $attr->id, 'value' => $vals[$k]]);
             }
             $p->update(['completeness' => $p->calculateCompleteness()]);
