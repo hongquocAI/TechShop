@@ -1,13 +1,14 @@
 @extends('layouts.app')
-@section('title', 'Cổng thanh toán giả lập')
+@section('title', __('Cổng thanh toán giả lập'))
 @section('content')
-<div class="max-w-md mx-auto bg-white rounded-xl p-6 shadow-sm text-center">
-    <div class="text-xs bg-yellow-100 text-yellow-800 rounded px-2 py-1 inline-block mb-3">Cổng giả lập — dùng để demo khi chưa cấu hình VNPay sandbox</div>
-    <h1 class="text-xl font-bold">Thanh toán đơn {{ $tx->order->code }}</h1>
-    <div class="text-3xl font-bold text-red-600 my-4">{{ number_format($tx->amount, 0, ',', '.') }}₫</div>
-    <form method="POST" action="{{ route('payment.mock.pay', $tx->transaction_code) }}" class="flex gap-3 justify-center">@csrf
-        <button name="result" value="success" class="bg-green-600 text-white px-5 py-2 rounded-lg">Thanh toán thành công</button>
-        <button name="result" value="fail" class="bg-gray-500 text-white px-5 py-2 rounded-lg">Hủy / thất bại</button>
-    </form>
+<div class="payment-demo">
+<p class="eyebrow">{{ __('TRẢI NGHIỆM THANH TOÁN') }}</p>
+<h1>{{ __('Cổng VNPay giả lập') }}</h1>
+<p class="summary-note">{{ __('Đây là bước mô phỏng cho website demo. Chọn một kết quả để xem trạng thái đơn hàng.') }}</p>
+<div class="demo-total"><span>{{ __('Đơn :code', ['code' => $tx->order->code]) }}</span><strong>{{ number_format($tx->amount, 0, ',', '.') }}₫</strong></div>
+<form method="POST" action="{{ route('payment.mock.pay', $tx->transaction_code) }}">@csrf
+<button name="result" value="success" class="button button-primary">{{ __('Mô phỏng thành công') }}</button>
+<button name="result" value="fail" class="button button-secondary">{{ __('Mô phỏng thất bại') }}</button>
+</form>
 </div>
 @endsection

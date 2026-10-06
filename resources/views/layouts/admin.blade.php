@@ -1,27 +1,33 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="{{ app()->getLocale() }}">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Quản trị') - TechShop</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+@include('components.appearance-init')
+<title>@yield('title', __('Quản trị')) - TechShop</title>
+<script src="https://cdn.tailwindcss.com">
+</script>
+<script>tailwind.config={theme:{extend:{colors:{indigo:{50:'#f0f7f3',100:'#deeee5',600:'#246451',700:'#194d3d'}}}}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js">
+</script>
+<link rel="stylesheet" href="{{ asset('css/storefront.css') }}?v={{ filemtime(public_path('css/storefront.css')) }}">
+<script defer src="{{ asset('js/storefront.js') }}?v={{ filemtime(public_path('js/storefront.js')) }}"></script>
 </head>
-<body class="bg-gray-100 text-gray-800 flex min-h-screen">
-<aside class="w-56 bg-gray-900 text-gray-200 p-4 text-sm space-y-1 shrink-0">
-    <div class="text-lg font-bold text-white mb-4">TechShop Admin</div>
-    @foreach([
-        ['admin.dashboard','Tổng quan'],['admin.products.index','Sản phẩm'],['admin.catalog','Danh mục / Thuộc tính'],
-        ['admin.orders.index','Đơn hàng'],['admin.import','Nhập / Xuất CSV'],
-    ] as [$r,$l])
-        <a href="{{ route($r) }}" class="block px-3 py-2 rounded hover:bg-gray-700 {{ request()->routeIs($r) ? 'bg-gray-700' : '' }}">{{ $l }}</a>
-    @endforeach
-    <a href="{{ route('home') }}" class="block px-3 py-2 rounded hover:bg-gray-700 mt-6 text-gray-400">← Về cửa hàng</a>
-    <form method="POST" action="{{ route('logout') }}">@csrf<button class="px-3 py-2 text-gray-400 hover:text-white">Đăng xuất</button></form>
+<body class="admin-shell">
+<aside class="admin-sidebar">
+<a href="{{ route('admin.dashboard') }}" class="wordmark">techshop<span class="brand-dot">.</span>
+</a>
+<p class="eyebrow">{{ __('QUẢN TRỊ CỬA HÀNG') }}</p>
+<nav aria-label="{{ __('Quản trị') }}">@foreach([['admin.dashboard','Tổng quan','filter'],['admin.products.index','Sản phẩm','bag'],['admin.catalog','Danh mục / Thuộc tính','keyboard'],['admin.orders.index','Đơn hàng','truck'],['admin.import','Nhập / Xuất CSV','arrow']] as [$r,$l,$icon])<a href="{{ route($r) }}" class="admin-nav-link {{ request()->routeIs($r) || ($r==='admin.products.index' && request()->routeIs('admin.products.*')) || ($r==='admin.orders.index' && request()->routeIs('admin.orders.*')) ? 'active' : '' }}">@include('components.icon',['name'=>$icon,'size'=>18]){{ __($l) }}</a>@endforeach</nav>
+<a href="{{ route('home') }}" class="admin-nav-link admin-back">{{ __('← Về cửa hàng') }}</a>
+<form method="POST" action="{{ route('logout') }}">@csrf<button class="admin-nav-link">{{ __('Đăng xuất') }}</button>
+</form>
 </aside>
-<main class="flex-1 p-6 overflow-x-auto">
-    @include('layouts.flash')
-    @yield('content')
-</main>
+<main class="admin-main">
+<div class="admin-topbar">
+<span>{{ __('Không gian quản trị') }}</span>
+<span>{{ auth()->user()->name }}</span>
+@include('components.theme-toggle')
+</div>@include('layouts.flash') @yield('content')</main>
 </body>
 </html>

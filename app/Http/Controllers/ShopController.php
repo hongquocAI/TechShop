@@ -12,7 +12,7 @@ class ShopController extends Controller
     public function home()
     {
         return view('shop.home', [
-            'featured' => Product::published()->where('stock', '>', 0)->latest()->take(8)->get(),
+            'featured' => Product::published()->with('brand')->where('stock', '>', 0)->latest()->take(8)->get(),
             'categories' => Category::withCount(['products' => fn ($q) => $q->published()])->get(),
         ]);
     }
@@ -39,6 +39,10 @@ class ShopController extends Controller
             'price_desc' => $q->orderByRaw('COALESCE(sale_price, price) desc'),
             default => $q->latest(),
         };
+        // Use a stable tie-breaker so products do not repeat between pages with equal dates/prices.
+        $q->orderByDesc('id');
+        $perPage = (int) $request->query('per_page', 6);
+        if (!in_array($perPage, [6, 12, 24], true)) $perPage = 6;
 
         // Bộ lọc thuộc tính hiển thị theo danh mục đang xem
         $filters = $category
@@ -49,8 +53,13 @@ class ShopController extends Controller
             })
             : collect();
 
+        $products = $q->paginate($perPage)->withQueryString();
+        if ($products->currentPage() > $products->lastPage()) {
+            return redirect()->to($products->url($products->lastPage()));
+        }
+
         return view('shop.index', [
-            'products' => $q->paginate(12)->withQueryString(),
+            'products' => $products,
             'category' => $category, 'brands' => Brand::orderBy('name')->get(),
             'categories' => Category::all(), 'filters' => $filters,
         ]);
@@ -59,7 +68,7 @@ class ShopController extends Controller
     public function show(string $slug)
     {
         $product = Product::published()->with(['brand', 'category', 'attributeValues.attribute'])->where('slug', $slug)->firstOrFail();
-        $related = Product::published()->where('category_id', $product->category_id)->where('id', '!=', $product->id)->take(4)->get();
+        $related = Product::published()->with('brand')->where('category_id', $product->category_id)->where('id', '!=', $product->id)->take(4)->get();
 
         return view('shop.show', compact('product', 'related'));
     }

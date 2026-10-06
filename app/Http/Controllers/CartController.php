@@ -22,11 +22,11 @@ class CartController extends Controller
         $already = $this->cart->raw()[$product->id] ?? 0;
 
         if ($already + $qty > $product->stock) {
-            return back()->with('error', "Chỉ còn {$product->stock} sản phẩm trong kho.");
+            return back()->with('error', __('Chỉ còn :count sản phẩm trong kho.', ['count' => $product->stock]));
         }
         $this->cart->add($product->id, $qty);
 
-        return redirect()->route('cart.index')->with('success', 'Đã thêm vào giỏ hàng.');
+        return redirect()->route('cart.index')->with('success', __('Đã thêm vào giỏ hàng.'));
     }
 
     public function update(Request $request, Product $product)

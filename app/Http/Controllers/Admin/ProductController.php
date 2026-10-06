@@ -32,7 +32,7 @@ class ProductController extends Controller
         $product = new Product;
         $this->save($product, $request);
 
-        return redirect()->route('admin.products.index')->with('success', 'Đã tạo sản phẩm.');
+        return redirect()->route('admin.products.index')->with('success', __('Đã tạo sản phẩm.'));
     }
 
     public function edit(Product $product)
@@ -44,14 +44,14 @@ class ProductController extends Controller
     {
         $this->save($product, $request);
 
-        return redirect()->route('admin.products.index')->with('success', 'Đã cập nhật sản phẩm.');
+        return redirect()->route('admin.products.index')->with('success', __('Đã cập nhật sản phẩm.'));
     }
 
     public function destroy(Product $product)
     {
         $product->delete(); // soft delete
 
-        return back()->with('success', 'Đã xóa sản phẩm.');
+        return back()->with('success', __('Đã xóa sản phẩm.'));
     }
 
     private function formData(Product $product): array
@@ -85,7 +85,7 @@ class ProductController extends Controller
         if ($data['status'] === 'published') {
             foreach ($attributes->where('is_required', true) as $a) {
                 if (blank($data['attr'][$a->id] ?? null)) {
-                    abort(back()->withInput()->withErrors(["attr.{$a->id}" => "Thiếu thuộc tính bắt buộc \"{$a->name}\" để xuất bản."]));
+                    abort(back()->withInput()->withErrors(["attr.{$a->id}" => __('Thiếu thuộc tính bắt buộc “:name” để xuất bản.', ['name' => __($a->name)])]));
                 }
             }
         }

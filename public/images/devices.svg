@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="dark" x1="0" y1="0" x2="1" y2="1">
+<stop stop-color="#4e5956"/>
+<stop offset=".5" stop-color="#273431"/>
+<stop offset="1" stop-color="#101d1a"/>
+</linearGradient>
+<linearGradient id="light" x1="0" y1="0" x2=".8" y2="1">
+<stop stop-color="#fff"/>
+<stop offset="1" stop-color="#d1ddd6"/>
+</linearGradient>
+<filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+<feDropShadow dx="4" dy="10" stdDeviation="7" flood-color="#153c2c" flood-opacity=".15"/>
+</filter>
+</defs>
+<symbol id="headphones" viewBox="0 0 400 400">
+<ellipse cx="206" cy="348" rx="113" ry="13" fill="#153c2c" opacity=".09"/>
+<g filter="url(#shadow)" transform="rotate(-12 200 200)">
+<path d="M91 217v-65c0-64 46-109 109-109s109 45 109 109v65" fill="none" stroke="#1d2f29" stroke-width="29"/>
+<path d="M94 154c0-66 43-108 106-108s106 42 106 108" fill="none" stroke="#65736a" stroke-width="7"/>
+<path d="M108 150c0-50 37-89 92-89s92 39 92 89" fill="none" stroke="#9ca89e" stroke-width="13"/>
+<path d="M87 181v61m226-61v61" stroke="#747f78" stroke-width="12"/>
+<rect x="59" y="192" width="77" height="133" rx="33" fill="url(#dark)"/>
+<rect x="72" y="200" width="43" height="117" rx="22" fill="#53615b"/>
+<rect x="113" y="206" width="29" height="104" rx="14" fill="#18231e"/>
+<rect x="264" y="192" width="77" height="133" rx="33" fill="url(#dark)"/>
+<rect x="285" y="200" width="43" height="117" rx="22" fill="#53615b"/>
+<rect x="258" y="206" width="29" height="104" rx="14" fill="#18231e"/>
+<path d="M320 269v12m0 8v5" stroke="#b7c6bd" stroke-width="3"/>
+</g>
+</symbol>
+<symbol id="earbuds" viewBox="0 0 400 400">
+<ellipse cx="200" cy="337" rx="109" ry="13" fill="#153c2c" opacity=".08"/>
+<g filter="url(#shadow)">
+<rect x="87" y="209" width="226" height="116" rx="52" fill="url(#light)"/>
+<path d="M89 244h222" stroke="#b9c9c1"/>
+<circle cx="200" cy="276" r="3" fill="#689785"/>
+<g transform="rotate(-20 138 143)">
+<rect x="121" y="116" width="32" height="78" rx="15" fill="url(#light)"/>
+<ellipse cx="137" cy="106" rx="32" ry="27" fill="url(#light)"/>
+<ellipse cx="128" cy="101" rx="11" ry="13" fill="#354b42"/>
+</g>
+<g transform="rotate(20 263 143)">
+<rect x="247" y="116" width="32" height="78" rx="15" fill="url(#light)"/>
+<ellipse cx="263" cy="106" rx="32" ry="27" fill="url(#light)"/>
+<ellipse cx="272" cy="101" rx="11" ry="13" fill="#354b42"/>
+</g>
+</g>
+</symbol>
+<symbol id="mouse" viewBox="0 0 400 400">
+<ellipse cx="205" cy="335" rx="83" ry="14" fill="#153c2c" opacity=".08"/>
+<g transform="rotate(-19 200 200)" filter="url(#shadow)">
+<path d="M123 180c0-61 24-100 78-100s78 39 78 100v60c0 49-25 87-78 87s-78-38-78-87v-60Z" fill="url(#dark)"/>
+<path d="M129 191c23-20 49-24 72-24s49 4 72 24" fill="none" stroke="#77887f"/>
+<path d="M201 83v88" stroke="#101d1a" stroke-width="3"/>
+<rect x="192" y="108" width="17" height="37" rx="8" fill="#b8c4bd"/>
+<path d="M144 235c12 15 15 34 11 48" stroke="#77887f" fill="none" stroke-width="3"/>
+</g>
+</symbol>
+<symbol id="keyboard" viewBox="0 0 400 400">
+<ellipse cx="200" cy="294" rx="154" ry="13" fill="#153c2c" opacity=".08"/>
+<g transform="rotate(-10 200 200)" filter="url(#shadow)">
+<rect x="35" y="131" width="330" height="143" rx="18" fill="#bbcfc5"/>
+<rect x="39" y="126" width="322" height="141" rx="16" fill="url(#light)"/>
+<g fill="#fdfefc" stroke="#afc3b6">
+<path d="M58 148h24v24H58Zm31 0h24v24H89Zm31 0h24v24h-24Zm31 0h24v24h-24Zm31 0h24v24h-24Zm31 0h24v24h-24Zm31 0h24v24h-24Zm31 0h24v24h-24Zm31 0h33v24h-33Z"/>
+<path d="M58 179h32v24H58Zm39 0h24v24H97Zm31 0h24v24h-24Zm31 0h24v24h-24Zm31 0h24v24h-24Zm31 0h24v24h-24Zm31 0h24v24h-24Zm31 0h56v24h-56Z"/>
+<path d="M58 211h43v24H58Zm50 0h24v24h-24Zm31 0h140v24H139Zm147 0h24v24h-24Zm31 0h22v24h-22Z"/>
+</g>
+</g>
+</symbol>
+<symbol id="charger" viewBox="0 0 400 400">
+<ellipse cx="197" cy="334" rx="93" ry="13" fill="#153c2c" opacity=".08"/>
+<g transform="rotate(-12 200 200)" filter="url(#shadow)">
+<path d="M148 92V52h15v40m50 0V52h15v40" fill="#9baaa1" stroke="#6c8073"/>
+<path d="m120 119 38-39h107l25 40v172l-28 26H120Z" fill="#40554a"/>
+<rect x="102" y="108" width="163" height="211" rx="22" fill="url(#dark)"/>
+<path d="M126 143h113" stroke="#5f7266"/>
+<rect x="125" y="201" width="47" height="16" rx="7" fill="#0b1811" stroke="#789285"/>
+<rect x="193" y="201" width="47" height="16" rx="7" fill="#0b1811" stroke="#789285"/>
+<rect x="132" y="244" width="100" height="24" rx="3" fill="#0b1811" stroke="#789285"/>
+<path d="M144 253h75" stroke="#b2c8b9" stroke-width="4"/>
+</g>
+</symbol>
+<symbol id="cable" viewBox="0 0 400 400">
+<ellipse cx="196" cy="323" rx="121" ry="12" fill="#153c2c" opacity=".08"/>
+<g fill="none" stroke="#35483e" stroke-width="11" filter="url(#shadow)">
+<path d="M115 136c-88 53-66 173 40 165 127-10 163-63 134-112-27-48-120-10-108 39s123 24 123-45V96"/>
+<path d="M112 165c-50 42-29 112 34 117 103 7 134-38 119-62"/>
+</g>
+<g transform="rotate(28 110 117)">
+<rect x="94" y="77" width="33" height="78" rx="9" fill="#657c6f"/>
+<rect x="99" y="56" width="23" height="33" rx="5" fill="#c3d1c8"/>
+<rect x="104" y="62" width="13" height="17" rx="3" fill="#53685c"/>
+</g>
+<rect x="288" y="62" width="33" height="63" rx="9" fill="#657c6f"/>
+<rect x="293" y="41" width="23" height="29" rx="5" fill="#c3d1c8"/>
+</symbol>
+<symbol id="powerbank" viewBox="0 0 400 400">
+<ellipse cx="211" cy="346" rx="96" ry="13" fill="#153c2c" opacity=".08"/>
+<g transform="rotate(-15 200 200)" filter="url(#shadow)">
+<rect x="127" y="62" width="156" height="272" rx="27" fill="#abc2b3"/>
+<rect x="112" y="57" width="156" height="272" rx="27" fill="url(#light)"/>
+<rect x="141" y="79" width="32" height="10" rx="3" fill="#243d2f"/>
+<rect x="187" y="79" width="54" height="10" rx="3" fill="#243d2f"/>
+<path d="m193 153-30 56h30l-11 40 37-62h-31Z" fill="#7ca18a"/>
+<g fill="#779383">
+<circle cx="159" cy="290" r="3"/>
+<circle cx="179" cy="290" r="3"/>
+<circle cx="199" cy="290" r="3"/>
+<circle cx="219" cy="290" r="3"/>
+</g>
+</g>
+</symbol>
+<symbol id="wired-earphones" viewBox="0 0 400 400">
+<ellipse cx="200" cy="333" rx="110" ry="12" fill="#153c2c" opacity=".08"/>
+<path d="M117 131v99c0 45 77 13 78 60 1 30 93 34 97-3 4-26-87-20-90-77l-6-68" fill="none" stroke="#6d8176" stroke-width="5"/>
+<g filter="url(#shadow)">
+<rect x="102" y="88" width="29" height="72" rx="14" fill="url(#light)"/>
+<ellipse cx="119" cy="79" rx="25" ry="27" fill="url(#light)"/>
+<ellipse cx="113" cy="74" rx="9" ry="12" fill="#364b3f"/>
+<rect x="182" y="99" width="29" height="73" rx="14" fill="url(#light)"/>
+<ellipse cx="195" cy="89" rx="25" ry="27" fill="url(#light)"/>
+<ellipse cx="201" cy="84" rx="9" ry="12" fill="#364b3f"/>
+</g>
+<rect x="276" y="266" width="28" height="48" rx="7" fill="#8caaa0"/>
+<rect x="282" y="306" width="17" height="25" rx="4" fill="#c0cfc6"/>
+</symbol>
+</svg>

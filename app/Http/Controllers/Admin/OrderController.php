@@ -26,7 +26,7 @@ class OrderController extends Controller
     {
         $to = $request->validate(['status' => 'required|in:'.implode(',', array_keys(Order::STATUSES))])['status'];
         if (! $order->canTransitionTo($to)) {
-            return back()->with('error', 'Không thể chuyển trạng thái này.');
+            return back()->with('error', __('Không thể chuyển trạng thái này.'));
         }
         $to === 'cancelled' ? $order->cancel() : $order->update(['status' => $to]);
         // COD: hoàn thành đơn = đã thu tiền
@@ -34,6 +34,6 @@ class OrderController extends Controller
             $order->update(['payment_status' => 'paid']);
         }
 
-        return back()->with('success', 'Đã cập nhật trạng thái.');
+        return back()->with('success', __('Đã cập nhật trạng thái.'));
     }
 }

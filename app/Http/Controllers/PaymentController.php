@@ -23,7 +23,7 @@ class PaymentController extends Controller
         }
 
         return redirect()->route('order.done', $tx->order->code)
-            ->with($valid ? 'success' : 'error', $valid ? 'Đã nhận kết quả thanh toán.' : 'Chữ ký không hợp lệ!');
+            ->with($valid ? 'success' : 'error', __($valid ? 'Đã nhận kết quả thanh toán.' : 'Chữ ký không hợp lệ!'));
     }
 
     /** IPN: VNPay gọi server-to-server (GET). Phải trả về JSON RspCode. */

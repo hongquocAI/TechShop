@@ -1,3 +1,11 @@
-@if(session('success'))<div class="mb-4 p-3 rounded bg-green-100 text-green-800 text-sm">{{ session('success') }}</div>@endif
-@if(session('error'))<div class="mb-4 p-3 rounded bg-red-100 text-red-800 text-sm">{{ session('error') }}</div>@endif
-@if($errors->any())<div class="mb-4 p-3 rounded bg-red-100 text-red-800 text-sm"><ul class="list-disc pl-5">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
+@if(session('success'))<div class="flash-message" role="status">@include('components.icon',['name'=>'check','size'=>18])<span>{{ session('success') }}</span>
+</div>@endif
+@if(session('error'))<div class="flash-message error" role="alert">
+<span>{{ session('error') }}</span>
+</div>@endif
+@if($errors->any())<div class="flash-message error" role="alert">
+<div>
+<strong>{{ __('Vui lòng kiểm tra lại thông tin:') }}</strong>
+<ul>@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+</div>
+</div>@endif

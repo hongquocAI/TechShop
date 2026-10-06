@@ -15,7 +15,7 @@ class AuthController extends Controller
     {
         $cred = $request->validate(['email' => 'required|email', 'password' => 'required']);
         if (! Auth::attempt($cred, $request->boolean('remember'))) {
-            return back()->withErrors(['email' => 'Email hoặc mật khẩu không đúng.'])->onlyInput('email');
+            return back()->withErrors(['email' => __('Email hoặc mật khẩu không đúng.')])->onlyInput('email');
         }
         $request->session()->regenerate(); // chống session fixation
 

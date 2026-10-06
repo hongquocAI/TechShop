@@ -413,13 +413,22 @@ PK1001,Tai nghe Demo,Tai nghe,Sony,850000,20,published,Mô tả ngắn,ket_noi=B
 
 **Chủ động lược bỏ để giữ đơn giản** (có thể trình bày là hướng phát triển):
 - Biến thể sản phẩm (SKU theo màu/dung lượng), đa kho
-- Đa ngôn ngữ / đa kênh bán
+- Đa kênh bán
 - Lưu lịch sử phiên bản dữ liệu sản phẩm (versioning)
 - RBAC nhiều vai trò chi tiết
 - Cổng thanh toán MoMo / ZaloPay, hoàn tiền tự động
 - Đánh giá sản phẩm, wishlist, mã giảm giá
 - Gửi email thông báo, hàng đợi (queue) nền
-- Kiểm thử tự động (PHPUnit/Pest)
+
+## 18. Giao diện
+
+Web dùng tiếng Việt. Bấm công tắc có biểu tượng mặt trời/mặt trăng cạnh tài khoản ở đầu trang để đổi **Sáng / Tối** (trang quản trị: góc trên bên phải).
+
+Chế độ sáng là mặc định. Lựa chọn được lưu trên trình duyệt và áp dụng cho cửa hàng lẫn quản trị khi tải lại hoặc chuyển trang. Nội dung sản phẩm hiển thị theo dữ liệu quản trị viên nhập.
+
+Kiểm thử chức năng: `php artisan test --filter=PreferencesTest` (SQLite tạm trong bộ nhớ).
+
+Danh sách sản phẩm mặc định có 6 sản phẩm/trang, có thể chọn 12 hoặc 24 ở **Mỗi trang**. Phân trang giữ từ khóa, bộ lọc và sắp xếp; trang vượt phạm vi được đưa về trang cuối. Kiểm thử: `php artisan test --filter=CatalogPaginationTest`.
 
 ---
 

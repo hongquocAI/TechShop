@@ -51,10 +51,10 @@ class ImportExportController extends Controller
             $line++;
             $r = array_combine($header, array_pad($row, count($header), null));
             if (blank($r['sku'] ?? null) || blank($r['name'] ?? null) || ! is_numeric($r['price'] ?? null)) {
-                $errors[] = "Dòng $line: thiếu sku/name hoặc giá không hợp lệ."; continue;
+                $errors[] = __('Dòng :line: thiếu sku/name hoặc giá không hợp lệ.', ['line' => $line]); continue;
             }
             $category = Category::where('name', $r['category'])->first();
-            if (! $category) { $errors[] = "Dòng $line: không có danh mục \"{$r['category']}\"."; continue; }
+            if (! $category) { $errors[] = __('Dòng :line: không có danh mục “:category”.', ['line' => $line, 'category' => $r['category']]); continue; }
             $status = in_array($r['status'] ?? '', ['draft', 'review', 'published']) ? $r['status'] : 'draft';
 
             $product = Product::withTrashed()->firstOrNew(['sku' => $r['sku']]);
@@ -78,6 +78,6 @@ class ImportExportController extends Controller
         }
         fclose($handle);
 
-        return back()->with('success', "Nhập thành công $ok sản phẩm.")->with('import_errors', $errors);
+        return back()->with('success', __('Nhập thành công :count sản phẩm.', ['count' => $ok]))->with('import_errors', $errors);
     }
 }

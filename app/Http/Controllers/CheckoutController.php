@@ -30,7 +30,7 @@ class CheckoutController extends Controller
             'address' => 'required|string|max:255',
             'note' => 'nullable|string|max:255',
             'payment_method' => 'required|in:cod,vnpay',
-        ], ['phone.regex' => 'Số điện thoại không hợp lệ.']);
+        ], ['phone.regex' => __('Số điện thoại không hợp lệ.')]);
 
         try {
             $order = $this->orders->place($data, $request->user()?->id);

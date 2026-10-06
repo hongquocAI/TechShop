@@ -21,7 +21,7 @@ class OrderService
     {
         $summary = $this->cart->summary();
         if ($summary['items']->isEmpty()) {
-            throw new RuntimeException('Giỏ hàng trống.');
+            throw new RuntimeException(__('Giỏ hàng trống.'));
         }
 
         return DB::transaction(function () use ($data, $userId, $summary) {
@@ -37,7 +37,7 @@ class OrderService
             foreach ($summary['items'] as $line) {
                 $product = Product::lockForUpdate()->find($line->product->id);
                 if ($product->stock < $line->quantity) {
-                    throw new RuntimeException("Sản phẩm \"{$product->name}\" chỉ còn {$product->stock} cái.");
+                    throw new RuntimeException(__('Sản phẩm “:name” chỉ còn :count cái.', ['name' => __($product->name), 'count' => $product->stock]));
                 }
                 $product->decrement('stock', $line->quantity);
 

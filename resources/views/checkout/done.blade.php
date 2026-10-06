@@ -1,19 +1,47 @@
 @extends('layouts.app')
-@section('title', 'Đơn hàng '.$order->code)
+@section('title', __('Đơn hàng :code', ['code' => $order->code]))
 @section('content')
-<div class="bg-white rounded-xl p-6 shadow-sm max-w-2xl mx-auto">
-    <h1 class="text-xl font-bold">Đơn hàng {{ $order->code }}</h1>
-    <div class="mt-2 flex gap-2 text-sm">
-        <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800">{{ \App\Models\Order::STATUSES[$order->status] }}</span>
-        <span class="px-2 py-0.5 rounded {{ $order->payment_status === 'paid' ? 'bg-green-100 text-green-800' : ($order->payment_status === 'failed' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') }}">{{ \App\Models\Order::PAYMENT_STATUSES[$order->payment_status] }}</span>
-        <span class="px-2 py-0.5 rounded bg-gray-100">{{ strtoupper($order->payment_method) }}</span>
-    </div>
-    <p class="text-sm text-gray-600 mt-3">{{ $order->name }} · {{ $order->phone }}<br>{{ $order->address }}</p>
-    <table class="w-full text-sm mt-4">
-        @foreach($order->items as $i)<tr class="border-t"><td class="py-2">{{ $i->name }} × {{ $i->quantity }}</td><td class="text-right">{{ number_format($i->price * $i->quantity, 0, ',', '.') }}₫</td></tr>@endforeach
-        <tr class="border-t"><td class="py-2">Phí vận chuyển</td><td class="text-right">{{ number_format($order->shipping_fee, 0, ',', '.') }}₫</td></tr>
-        <tr class="border-t font-bold"><td class="py-2">Tổng cộng</td><td class="text-right text-red-600">{{ number_format($order->total, 0, ',', '.') }}₫</td></tr>
-    </table>
-    <a href="{{ route('home') }}" class="inline-block mt-4 text-indigo-600">← Tiếp tục mua sắm</a>
+<div class="order-result">
+<div class="order-result-header">
+<span class="result-icon">@include('components.icon',['name'=>'check','size'=>26])</span>
+<p class="eyebrow">{{ __('THÔNG TIN ĐƠN HÀNG') }}</p>
+<h1>{{ $order->status === 'cancelled' ? __('Đơn hàng đã hủy') : __('Đã nhận đơn hàng của bạn') }}</h1>
+<p>{{ __('Mã đơn') }} <strong>{{ $order->code }}</strong>
+</p>
+<div class="order-states">
+<span class="status-chip">{{ __(\App\Models\Order::STATUSES[$order->status]) }}</span>
+<span class="status-chip">{{ __(\App\Models\Order::PAYMENT_STATUSES[$order->payment_status]) }}</span>
+</div>
+</div>
+<div class="order-result-body">
+<div class="delivery-info">
+<h2>{{ __('Thông tin nhận hàng') }}</h2>
+<p>
+<strong>{{ $order->name }}</strong> · {{ $order->phone }}<br>{{ $order->address }}</p>
+<p>{{ __('Phương thức: :method', ['method' => strtoupper($order->payment_method)]) }}</p>
+</div>
+<table class="order-table">
+<thead>
+<tr>
+<th>{{ __('Sản phẩm') }}</th>
+<th>{{ __('Thành tiền') }}</th>
+</tr>
+</thead>
+<tbody>@foreach($order->items as $i)<tr>
+<td>{{ __($i->name) }} <small>× {{ $i->quantity }}</small>
+</td>
+<td>{{ number_format($i->price*$i->quantity,0,',','.') }}₫</td>
+</tr>@endforeach<tr>
+<td>{{ __('Phí vận chuyển') }}</td>
+<td>{{ $order->shipping_fee ? number_format($order->shipping_fee,0,',','.').'₫' : __('Miễn phí') }}</td>
+</tr>
+<tr class="order-total">
+<td>{{ __('Tổng cộng') }}</td>
+<td>{{ number_format($order->total,0,',','.') }}₫</td>
+</tr>
+</tbody>
+</table>
+<a href="{{ route('products.index') }}" class="button button-primary">{{ __('Tiếp tục mua sắm') }} @include('components.icon',['name'=>'arrow','size'=>18])</a>
+</div>
 </div>
 @endsection
