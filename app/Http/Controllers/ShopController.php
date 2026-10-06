@@ -6,13 +6,14 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class ShopController extends Controller
 {
     public function home()
     {
         return view('shop.home', [
-            'featured' => Product::published()->with('brand')->where('stock', '>', 0)->latest()->take(8)->get(),
+            'featured' => Product::published()->with(['brand', 'category'])->where('stock', '>', 0)->latest()->orderByDesc('id')->take(8)->get(),
             'categories' => Category::withCount(['products' => fn ($q) => $q->published()])->get(),
         ]);
     }
@@ -58,17 +59,44 @@ class ShopController extends Controller
             return redirect()->to($products->url($products->lastPage()));
         }
 
+        $brands = Brand::orderBy('name')->get();
+        $activeFilters = [];
+        $addFilter = function (string $key, string $label) use ($request, &$activeFilters) {
+            $query = $request->except('page');
+            Arr::forget($query, $key);
+            if (isset($query['attr']) && $query['attr'] === []) unset($query['attr']);
+            $activeFilters[] = [
+                'label' => $label,
+                'url' => $request->url().($query ? '?'.http_build_query($query) : ''),
+            ];
+        };
+        if ($request->filled('q')) $addFilter('q', 'Tìm: '.$request->query('q'));
+        if ($brand = $brands->firstWhere('id', $request->query('brand'))) $addFilter('brand', $brand->name);
+        if ($request->filled('min')) $addFilter('min', 'Từ '.number_format((int) $request->query('min'), 0, ',', '.').'₫');
+        if ($request->filled('max')) $addFilter('max', 'Đến '.number_format((int) $request->query('max'), 0, ',', '.').'₫');
+        foreach ($filters as $filter) {
+            if ($request->filled("attr.{$filter->id}")) {
+                $addFilter("attr.{$filter->id}", $filter->name.': '.$request->input("attr.{$filter->id}"));
+            }
+        }
+        $displayQuery = $request->only('sort', 'per_page');
+        $clearFiltersUrl = $request->url().($displayQuery ? '?'.http_build_query($displayQuery) : '');
+        $catalogPreview = $category?->products()->published()->whereNotNull('image')
+            ->where('image', '!=', '')->orderByDesc('id')->first();
+
         return view('shop.index', [
             'products' => $products,
-            'category' => $category, 'brands' => Brand::orderBy('name')->get(),
-            'categories' => Category::all(), 'filters' => $filters,
+            'category' => $category, 'brands' => $brands,
+            'categories' => Category::withCount(['products' => fn ($q) => $q->published()])->get(), 'filters' => $filters,
+            'activeFilters' => $activeFilters, 'clearFiltersUrl' => $clearFiltersUrl,
+            'catalogPreview' => $catalogPreview,
         ]);
     }
 
     public function show(string $slug)
     {
         $product = Product::published()->with(['brand', 'category', 'attributeValues.attribute'])->where('slug', $slug)->firstOrFail();
-        $related = Product::published()->with('brand')->where('category_id', $product->category_id)->where('id', '!=', $product->id)->take(4)->get();
+        $related = Product::published()->with(['brand', 'category'])->where('category_id', $product->category_id)->where('id', '!=', $product->id)->take(4)->get();
 
         return view('shop.show', compact('product', 'related'));
     }

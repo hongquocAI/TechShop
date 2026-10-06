@@ -14,7 +14,12 @@
 </div>
 <div class="form-field">
 <label for="login-password">{{ __('Mật khẩu') }}</label>
-<input id="login-password" class="field" name="password" type="password" autocomplete="current-password" required>
+<div class="password-field">
+<input id="login-password" class="field" name="password" type="password" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" pattern="[\x20-\x7E]+" title="{{ __('Chỉ dùng chữ không dấu, số và ký tự đặc biệt.') }}" aria-describedby="login-password-help login-password-error" data-password-input required>
+<button type="button" class="password-toggle" data-password-toggle aria-controls="login-password" aria-pressed="false" aria-label="{{ __('Hiện mật khẩu') }}" title="{{ __('Hiện mật khẩu') }}" hidden><span data-password-eye>@include('components.icon',['name'=>'eye'])</span><span data-password-eye-off hidden>@include('components.icon',['name'=>'eye-off'])</span></button>
+</div>
+<small id="login-password-help">{{ __('Chỉ dùng chữ không dấu, số và ký tự đặc biệt.') }}</small>
+<small id="login-password-error" class="password-error" role="status" hidden>{{ __('Mật khẩu không được chứa ký tự tiếng Việt hoặc ký tự có dấu. Hãy tắt bộ gõ tiếng Việt và nhập lại.') }}</small>
 </div>
 <label class="remember">
 <input type="checkbox" name="remember" @checked(old('remember'))>{{ __('Ghi nhớ đăng nhập') }}</label>

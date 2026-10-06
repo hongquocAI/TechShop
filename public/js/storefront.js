@@ -23,6 +23,44 @@ window.addEventListener('storage', event => {
  applyTheme();
 });
 applyTheme();
+document.querySelectorAll('[data-password-toggle]').forEach(toggle => {
+ const input = document.getElementById(toggle.getAttribute('aria-controls'));
+ if (!input) return;
+ const label = toggle.dataset.passwordLabel || 'mật khẩu';
+ const setVisible = visible => {
+  input.type = visible ? 'text' : 'password';
+  toggle.querySelector('[data-password-eye]').hidden = visible;
+  toggle.querySelector('[data-password-eye-off]').hidden = !visible;
+  toggle.setAttribute('aria-pressed', String(visible));
+  toggle.setAttribute('aria-label', (visible ? 'Ẩn ' : 'Hiện ') + label);
+  toggle.title = (visible ? 'Ẩn ' : 'Hiện ') + label;
+ };
+ toggle.hidden = false;
+ toggle.addEventListener('click', () => {
+  const start = input.selectionStart, end = input.selectionEnd;
+  setVisible(input.type === 'password');
+  input.focus({preventScroll:true});
+  if (start !== null && end !== null) input.setSelectionRange(start, end);
+ });
+ input.form?.addEventListener('submit', () => setVisible(false));
+ window.addEventListener('pageshow', () => setVisible(false));
+});
+document.querySelectorAll('[data-password-input]').forEach(input => {
+ const error = document.getElementById(input.id + '-error');
+ let composing = false;
+ const validate = () => {
+  const invalid = /[^\x20-\x7E]/.test(input.value);
+  input.setCustomValidity(invalid ? 'Mật khẩu chỉ được dùng chữ không dấu, số và ký tự đặc biệt.' : '');
+  input.setAttribute('aria-invalid', String(invalid));
+  if (error) error.hidden = !invalid;
+ };
+ input.addEventListener('compositionstart', () => { composing = true; });
+ input.addEventListener('compositionend', () => { composing = false; validate(); });
+ input.addEventListener('input', event => { if (!composing && !event.isComposing) validate(); });
+ input.addEventListener('change', validate);
+ input.addEventListener('invalid', validate);
+ window.addEventListener('pageshow', validate);
+});
 document.querySelectorAll('form[data-confirm]').forEach(form => {
  form.addEventListener('submit', event => { if (!window.confirm(form.dataset.confirm)) event.preventDefault(); });
 });

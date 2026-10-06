@@ -59,9 +59,22 @@ class CatalogPaginationTest extends TestCase
         $this->assertSame(10, $first->total());
         parse_str(parse_url($first->nextPageUrl(), PHP_URL_QUERY), $nextQuery);
         $this->assertEquals($query + ['page' => 2], $nextQuery);
-        $second = $this->get($first->nextPageUrl())->assertOk()->viewData('products');
+        $secondResponse = $this->get($first->nextPageUrl())->assertOk();
+        $second = $secondResponse->viewData('products');
         $this->assertCount(4, $second);
         $this->assertSame([450, 500, 550, 600], $second->pluck('price')->all());
+
+        // Removing one selected attribute keeps the other filters and restarts pagination.
+        $chips = $secondResponse->viewData('activeFilters');
+        $attributeChip = collect($chips)->first(fn ($chip) => str_starts_with($chip['label'], 'Kết nối:'));
+        $this->assertSame('Kết nối: Có dây', $attributeChip['label']);
+        parse_str(parse_url($attributeChip['url'], PHP_URL_QUERY), $chipQuery);
+        $this->assertEquals(collect($query)->except('attr')->all(), $chipQuery);
+        $this->assertSame('/danh-muc/tai-nghe', parse_url($attributeChip['url'], PHP_URL_PATH));
+        $this->get($attributeChip['url'])->assertOk();
+
+        parse_str(parse_url($secondResponse->viewData('clearFiltersUrl'), PHP_URL_QUERY), $clearQuery);
+        $this->assertEquals(['sort'=>'price_asc', 'per_page'=>6], $clearQuery);
     }
 
     public function test_stale_page_redirects_to_last_page_with_filters_and_labels_remain_vietnamese(): void
@@ -71,5 +84,70 @@ class CatalogPaginationTest extends TestCase
         $this->withCookie('techshop_locale', 'en')->get('/san-pham')
             ->assertOk()->assertSee('Trang 1 / 2')->assertSee('aria-label="Trang sau"', false)
             ->assertSee('Mỗi trang');
+    }
+
+    public function test_new_categories_appear_and_use_neutral_images_until_a_photo_is_uploaded(): void
+    {
+        $category = Category::create(['name'=>'Lót chuột', 'slug'=>'lot-chuot']);
+        $this->get('/danh-muc/lot-chuot')->assertOk()->assertSee('Lót chuột')
+            ->assertSee('0 sản phẩm')->assertSee('catalog-neutral-art', false);
+
+        $product = Product::create([
+            'category_id'=>$category->id, 'name'=>'Lót Chuột Gaming',
+            'slug'=>'lot-chuot-gaming', 'sku'=>'NEW-MOUSEPAD',
+            'price'=>100000, 'stock'=>5, 'status'=>'published',
+        ]);
+        $attribute = $category->attributes()->create([
+            'name'=>'Chất liệu', 'code'=>'chat_lieu', 'type'=>'select',
+            'options'=>['Vải', 'Nhựa'], 'is_filterable'=>true,
+        ]);
+        $product->attributeValues()->create(['attribute_id'=>$attribute->id, 'value'=>'Vải']);
+
+        $response = $this->get('/danh-muc/lot-chuot?'.http_build_query(['attr'=>[$attribute->id=>'Vải']]))
+            ->assertOk()->assertSee('1 sản phẩm')->assertSee('Chất liệu: Vải')
+            ->assertSee('Chưa có ảnh')->assertDontSee('#headphones', false)->assertDontSee('#mouse', false);
+        $this->assertSame($product->id, $response->viewData('products')->first()->id);
+        $this->get('/san-pham')->assertOk()->assertSee('Lót chuột')->assertSee('13 sản phẩm');
+        $this->get('/')->assertOk()->assertSee('Lót chuột')->assertSee('Lót Chuột Gaming');
+        $this->get('/san-pham/lot-chuot-gaming')->assertOk()->assertSee('Chưa có ảnh');
+        $this->withSession(['cart'=>[$product->id=>1]])->get('/gio-hang')->assertOk()->assertSee('Chưa có ảnh');
+    }
+
+    public function test_category_banner_uses_a_published_product_photo_when_available(): void
+    {
+        $category = Category::create(['name'=>'Lót chuột', 'slug'=>'lot-chuot']);
+        $product = Product::create([
+            'category_id'=>$category->id, 'name'=>'Lót Chuột Gaming',
+            'slug'=>'lot-chuot-gaming', 'sku'=>'PHOTO-MOUSEPAD',
+            'price'=>100000, 'stock'=>5, 'status'=>'published', 'image'=>'products/mousepad.jpg',
+        ]);
+        Product::create([
+            'category_id'=>$category->id, 'name'=>'Draft mousepad',
+            'slug'=>'draft-mousepad', 'sku'=>'DRAFT-MOUSEPAD',
+            'price'=>100000, 'stock'=>5, 'status'=>'draft', 'image'=>'products/draft.jpg',
+        ]);
+
+        $response = $this->get('/danh-muc/lot-chuot')->assertOk()
+            ->assertSee('catalog-category-photo', false)->assertSee('products/mousepad.jpg', false)
+            ->assertDontSee('products/draft.jpg', false)->assertDontSee('catalog-neutral-art', false)
+            ->assertDontSee('Chưa có ảnh');
+        $this->assertSame($product->id, $response->viewData('catalogPreview')->id);
+    }
+
+    public function test_category_strip_counts_only_published_products(): void
+    {
+        $category = Category::where('slug', 'tai-nghe')->firstOrFail();
+        Product::create([
+            'category_id' => $category->id, 'name' => 'Unpublished headphones',
+            'slug' => 'unpublished-headphones', 'sku' => 'DRAFT-HEADPHONES',
+            'price' => 100, 'stock' => 1, 'status' => 'draft',
+        ]);
+
+        $response = $this->get('/san-pham')->assertOk()
+            ->assertSee('Chọn danh mục sản phẩm')->assertSee('catalog-intro', false);
+        $this->assertSame(4, $response->viewData('categories')->firstWhere('id', $category->id)->products_count);
+        $this->assertSame(12, $response->viewData('categories')->sum('products_count'));
+        $this->assertCount(0, $response->viewData('activeFilters'));
+        $response->assertDontSee('catalog-filter-chip', false);
     }
 }

@@ -39,7 +39,7 @@ class CartService
     /** @return array{items: \Illuminate\Support\Collection, subtotal: int, shipping: int, total: int} */
     public function summary(): array
     {
-        $products = Product::published()->whereIn('id', array_keys($this->raw()))->get()->keyBy('id');
+        $products = Product::published()->with('category')->whereIn('id', array_keys($this->raw()))->get()->keyBy('id');
         $items = collect($this->raw())->map(function ($qty, $id) use ($products) {
             $p = $products->get($id);
             return $p ? (object) ['product' => $p, 'quantity' => $qty, 'line_total' => $p->final_price * $qty] : null;
