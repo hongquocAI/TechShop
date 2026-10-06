@@ -27,5 +27,3 @@ Homestead.yaml
 Thumbs.db
 /work/
 /outputs/
-/storage/app/private/semantic-search/
-/services/semantic-search/__pycache__/
