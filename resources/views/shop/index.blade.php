@@ -59,7 +59,7 @@
 <div>
 <label class="sr-only" for="catalog-sort">{{ __('Sắp xếp sản phẩm') }}</label>
 <select id="catalog-sort" name="sort" onchange="this.form.submit()">
-<option value="">{{ __('Mới nhất') }}</option>
+<option value="">{{ $semanticSearch ? 'Phù hợp nhất' : __('Mới nhất') }}</option>
 <option value="price_asc" @selected(request('sort')=='price_asc')>{{ __('Giá thấp đến cao') }}</option>
 <option value="price_desc" @selected(request('sort')=='price_desc')>{{ __('Giá cao đến thấp') }}</option>
 </select>

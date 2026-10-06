@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\SemanticSearch;
 use Illuminate\Http\Request;
 
 class ShopController extends Controller
@@ -22,7 +23,19 @@ class ShopController extends Controller
         $q = Product::published()->with(['brand', 'category']);
 
         if ($category) $q->where('category_id', $category->id);
-        if ($s = $request->query('q')) $q->where('name', 'like', "%{$s}%");
+        $search = trim((string) $request->query('q', ''));
+        $semanticIds = $search !== '' ? app(SemanticSearch::class)->search($search, [
+            'category_id' => $category?->id,
+            'brand_id' => $request->query('brand'),
+            'min' => $request->query('min'), 'max' => $request->query('max'),
+            'attributes' => (array) $request->query('attr', []),
+        ]) : null;
+        if ($search !== '') {
+            $q->where(function ($matches) use ($search, $semanticIds) {
+                $matches->where('name', 'like', "%{$search}%")->orWhere('sku', 'like', "%{$search}%");
+                if ($semanticIds) $matches->orWhereIn('id', $semanticIds);
+            });
+        }
         if ($b = $request->query('brand')) $q->where('brand_id', $b);
         if ($min = $request->query('min')) $q->whereRaw('COALESCE(sale_price, price) >= ?', [(int) $min]);
         if ($max = $request->query('max')) $q->whereRaw('COALESCE(sale_price, price) <= ?', [(int) $max]);
@@ -34,10 +47,19 @@ class ShopController extends Controller
             }
         }
 
+        $rankOrder = $semanticIds
+            ? 'CASE id '.implode(' ', array_map(
+                fn ($id, $rank) => 'WHEN '.(int) $id.' THEN '.(int) $rank,
+                $semanticIds, array_keys($semanticIds),
+            )).' ELSE 1000 END'
+            : 'id DESC';
         match ($request->query('sort')) {
             'price_asc' => $q->orderByRaw('COALESCE(sale_price, price) asc'),
             'price_desc' => $q->orderByRaw('COALESCE(sale_price, price) desc'),
-            default => $q->latest(),
+            default => $semanticIds !== null && $search !== ''
+                ? $q->orderByRaw('CASE WHEN name LIKE ? OR sku LIKE ? THEN 0 ELSE 1 END', ["%{$search}%", "%{$search}%"])
+                    ->orderByRaw($rankOrder)
+                : $q->latest(),
         };
         // Use a stable tie-breaker so products do not repeat between pages with equal dates/prices.
         $q->orderByDesc('id');
@@ -62,6 +84,7 @@ class ShopController extends Controller
             'products' => $products,
             'category' => $category, 'brands' => Brand::orderBy('name')->get(),
             'categories' => Category::all(), 'filters' => $filters,
+            'semanticSearch' => $semanticIds !== null && $search !== '',
         ]);
     }
 

@@ -432,4 +432,53 @@ Danh sách sản phẩm mặc định có 6 sản phẩm/trang, có thể chọn
 
 ---
 
+## 19. Thử nghiệm tìm kiếm ngữ nghĩa và rollback
+
+Checkpoint trước khi tích hợp: **`cf618a4`**, tag **`checkpoint-before-semantic-search-20261006`**. Bản `.env` cũ được lưu riêng trong `work/checkpoints/pre-semantic-search.env` (không đưa vào Git).
+
+Thử nghiệm dùng **multilingual-e5-small ONNX INT8**, chạy CPU tại `127.0.0.1:8010`. Laravel kết hợp kết quả ngữ nghĩa với từ khóa tên/SKU, ưu tiên tên/model khớp trực tiếp. Khi dịch vụ lỗi hoặc quá thời gian 1,2 giây, web tự dùng tìm kiếm từ khóa; các yêu cầu tiếp theo bỏ qua AI trong 15 giây. Tắt bằng `SEMANTIC_SEARCH_ENABLED=false`.
+
+- Mô hình + tokenizer: khoảng **135 MB**; môi trường Python riêng: **151 MB**. Đo RAM dịch vụ khoảng **460 MB** trên máy hiện tại.
+- Vector được tạo sẵn, lưu trong `storage/app/private/semantic-search`. Khi thêm/sửa/xóa sản phẩm qua ứng dụng, Laravel ghi thay đổi sau request; dịch vụ kiểm tra mỗi 2 giây và chỉ tính lại vector khi nội dung thay đổi. Lúc đang cập nhật, bộ vector cũ tiếp tục phục vụ tìm kiếm. Sản phẩm nháp/xóa vẫn bị chặn bằng truy vấn database.
+- Mỗi sản phẩm dùng một vector 384 chiều, văn bản tối đa 192 token. Mỗi lượt lấy tối đa 100 ứng viên ngữ nghĩa, sau đó kết hợp từ khóa và phân trang. Ngưỡng mặc định `0.84` và khoảng cách tối đa `0.035` so với kết quả tốt nhất; cần đánh giá lại với danh mục thực tế lớn hơn.
+- Yêu cầu rõ về loại sản phẩm, không dây/chống ồn được đối chiếu tên/danh mục/thuộc tính. Tìm ngữ nghĩa vẫn có thể chưa hiểu chính xác mọi câu hoặc điều kiện số; dùng bộ lọc giá và thuộc tính để chỉ định chính xác.
+- Không cần dịch sản phẩm sang tiếng Anh hay huấn luyện lại khi thêm sản phẩm. Dữ liệu và câu tìm kiếm được xử lý cục bộ.
+
+Các lệnh PowerShell dưới đây chạy từ thư mục dự án. Nếu máy chưa có môi trường, dùng Python 3.12:
+
+```powershell
+.\services\semantic-search\Setup-Search.ps1 -Python C:\duong-dan\python.exe
+.\services\semantic-search\Start-Search.ps1
+.\services\semantic-search\Set-SearchMode.ps1 -Mode Hybrid
+```
+
+Nếu đóng máy hoặc dừng dịch vụ, chạy lại `Start-Search.ps1` sau khi mở Laragon. Dịch vụ được mở ẩn, chỉ lắng nghe localhost. Nếu `php` chưa nằm trong PATH, truyền `-Php` với đường dẫn PHP Laragon cho `Set-SearchMode.ps1` hoặc `Rollback-Search.ps1`.
+
+Quay về tìm kiếm từ khóa và dừng AI bằng một lệnh, giữ toàn bộ dữ liệu sản phẩm:
+
+```powershell
+.\services\semantic-search\Rollback-Search.ps1
+```
+
+Muốn gỡ toàn bộ mã thử nghiệm và trở về checkpoint, sau lệnh trên chạy:
+
+```powershell
+git revert --no-edit trial-semantic-search-20261006
+php artisan optimize:clear
+```
+
+Lệnh revert tạo commit khôi phục, giữ lịch sử Git. Mô hình/môi trường và các vector là dữ liệu cục bộ bị bỏ qua bởi Git, có thể giữ để thử lại. Nếu đã sửa thêm mã thử nghiệm, kiểm tra thay đổi trước khi revert. Không cần rollback database vì thử nghiệm không thay cấu trúc hoặc dữ liệu gốc.
+
+Đo tốc độ:
+
+```powershell
+.\work\semantic-venv\Scripts\python.exe services\semantic-search\benchmark.py
+```
+
+Kết quả lưu tại `outputs/semantic-search-benchmark.json`. Lần đo hiện tại: phần xử lý mô hình + truy xuất với **10.000 vector mô phỏng** có trung vị khoảng **19 ms**, p95 khoảng **22 ms** cho câu tìm chưa cache; vector thô **15,36 MB**. Phép thử lặp vector của 12 sản phẩm hiện có, **không phải kiểm thử chất lượng trên 10.000 sản phẩm khác nhau**, không đo tải nhiều người đồng thời và không bao gồm thời gian Laravel/render trang.
+
+Kiểm thử: `php artisan test` và `.\work\semantic-venv\Scripts\python.exe -m unittest discover -s services/semantic-search -p test_index.py -v`.
+
+Nguồn mô hình: [E5-small](https://huggingface.co/intfloat/multilingual-e5-small), revision `614241f622f53c4eeff9890bdc4f31cfecc418b3`. Script tải chỉ lấy ONNX INT8 và tokenizer, xác minh SHA-256 graph; dependencies Python được cố định trong `services/semantic-search/requirements.txt`.
+
 © Dự án học phần **Lập trình mã nguồn mở**. Mã nguồn dùng cho mục đích học tập.
