@@ -27,3 +27,7 @@ Homestead.yaml
 Thumbs.db
 /work/
 /outputs/
+
+# Bao cao do an (Word) - khong dua len repo
+*.docx
+*.doc
